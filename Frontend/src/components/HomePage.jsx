@@ -35,11 +35,11 @@ export default function HomePage({ user, onLogout }) {
     <div className="home-page">
       <nav className="navbar">
         <div className="navbar-brand">
-          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="16" cy="10" r="6" fill="#6366f1" />
             <path d="M4 28c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" />
-          </svg>
-          UserSystem
+          </svg> */}
+          
         </div>
 
         <div className="navbar-right">

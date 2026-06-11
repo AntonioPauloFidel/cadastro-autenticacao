@@ -13,7 +13,7 @@ export default function AuthPage({ onLogin }) {
           <path d="M8 56c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" fillOpacity="0.9"/>
         </svg>
         <h1>Bem-vindo ao Sistema</h1>
-        <p>Gerencie seus usuários com segurança e praticidade.</p>
+        {/* <p>Gerencie seus usuários com segurança e praticidade.</p> */}
       </div>
 
       <div className="auth-right">
