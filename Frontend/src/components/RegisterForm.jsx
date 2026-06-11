@@ -35,21 +35,22 @@ export default function RegisterForm({ onSuccess }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      {serverError && <div className="alert error">{serverError}</div>}
-      {successMsg && <div className="alert success">{successMsg}</div>}
+      {serverError && <div className="alert error">⚠ {serverError}</div>}
+      {successMsg && <div className="alert success">✓ {successMsg}</div>}
 
       <div className="field">
-        <label htmlFor="name">Nome</label>
+        <label htmlFor="name">Nome completo</label>
         <input
           id="name"
           type="text"
+          placeholder="Seu nome"
           className={errors.name ? 'error-input' : ''}
           {...register('name', {
             required: 'O nome é obrigatório.',
-            minLength: { value: 2, message: 'O nome deve ter pelo menos 2 caracteres.' },
+            minLength: { value: 2, message: 'Mínimo de 2 caracteres.' },
           })}
         />
-        {errors.name && <span className="error-msg">{errors.name.message}</span>}
+        {errors.name && <span className="error-msg">⚠ {errors.name.message}</span>}
       </div>
 
       <div className="field">
@@ -57,16 +58,14 @@ export default function RegisterForm({ onSuccess }) {
         <input
           id="email"
           type="email"
+          placeholder="seu@email.com"
           className={errors.email ? 'error-input' : ''}
           {...register('email', {
             required: 'O e-mail é obrigatório.',
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: 'Informe um e-mail válido.',
-            },
+            pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'E-mail inválido.' },
           })}
         />
-        {errors.email && <span className="error-msg">{errors.email.message}</span>}
+        {errors.email && <span className="error-msg">⚠ {errors.email.message}</span>}
       </div>
 
       <div className="field">
@@ -74,34 +73,35 @@ export default function RegisterForm({ onSuccess }) {
         <input
           id="password"
           type="password"
+          placeholder="Mínimo 6 caracteres"
           className={errors.password ? 'error-input' : ''}
           {...register('password', {
             required: 'A senha é obrigatória.',
-            minLength: { value: 6, message: 'A senha deve ter pelo menos 6 caracteres.' },
+            minLength: { value: 6, message: 'Mínimo de 6 caracteres.' },
           })}
         />
-        {errors.password && <span className="error-msg">{errors.password.message}</span>}
+        {errors.password && <span className="error-msg">⚠ {errors.password.message}</span>}
       </div>
 
       <div className="field">
-        <label htmlFor="confirmPassword">Confirmar Senha</label>
+        <label htmlFor="confirmPassword">Confirmar senha</label>
         <input
           id="confirmPassword"
           type="password"
+          placeholder="Repita a senha"
           className={errors.confirmPassword ? 'error-input' : ''}
           {...register('confirmPassword', {
-            required: 'A confirmação de senha é obrigatória.',
-            validate: (value, formValues) =>
-              value === formValues.password || 'As senhas não coincidem.',
+            required: 'Confirme sua senha.',
+            validate: (v, f) => v === f.password || 'As senhas não coincidem.',
           })}
         />
         {errors.confirmPassword && (
-          <span className="error-msg">{errors.confirmPassword.message}</span>
+          <span className="error-msg">⚠ {errors.confirmPassword.message}</span>
         )}
       </div>
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
+      <button type="submit" className="btn-primary" disabled={isSubmitting}>
+        {isSubmitting ? 'Cadastrando...' : 'Criar conta'}
       </button>
     </form>
   );

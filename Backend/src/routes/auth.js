@@ -10,22 +10,17 @@ const registerValidations = [
     .trim()
     .notEmpty().withMessage('O nome é obrigatório.')
     .isLength({ min: 2 }).withMessage('O nome deve ter pelo menos 2 caracteres.'),
-
   body('email')
     .trim()
     .notEmpty().withMessage('O e-mail é obrigatório.')
     .isEmail().withMessage('Informe um e-mail válido.'),
-
   body('password')
     .notEmpty().withMessage('A senha é obrigatória.')
     .isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
-
   body('confirmPassword')
     .notEmpty().withMessage('A confirmação de senha é obrigatória.')
     .custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error('As senhas não coincidem.');
-      }
+      if (value !== req.body.password) throw new Error('As senhas não coincidem.');
       return true;
     }),
 ];
@@ -35,7 +30,6 @@ const loginValidations = [
     .trim()
     .notEmpty().withMessage('O e-mail é obrigatório.')
     .isEmail().withMessage('Informe um e-mail válido.'),
-
   body('password')
     .notEmpty().withMessage('A senha é obrigatória.'),
 ];
@@ -49,19 +43,20 @@ router.post('/register', registerValidations, async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    const existing = await db.get('SELECT id FROM users WHERE email = ?', [email]);
     if (existing) {
       return res.status(409).json({ errors: [{ msg: 'Este e-mail já está cadastrado.' }] });
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    const result = db.prepare(
-      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)'
-    ).run(name, email, hashed);
+    const result = await db.run(
+      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+      [name, email, hashed]
+    );
 
     return res.status(201).json({
       message: 'Usuário cadastrado com sucesso.',
-      userId: result.lastInsertRowid,
+      userId: result.lastID,
     });
   } catch (err) {
     return res.status(500).json({ errors: [{ msg: 'Erro interno no servidor.' }] });
@@ -77,7 +72,7 @@ router.post('/login', loginValidations, async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
     if (!user) {
       return res.status(401).json({ errors: [{ msg: 'E-mail ou senha inválidos.' }] });
     }
@@ -91,6 +86,17 @@ router.post('/login', loginValidations, async (req, res) => {
       message: 'Login realizado com sucesso.',
       user: { id: user.id, name: user.name, email: user.email },
     });
+  } catch (err) {
+    return res.status(500).json({ errors: [{ msg: 'Erro interno no servidor.' }] });
+  }
+});
+
+router.get('/users', async (req, res) => {
+  try {
+    const users = await db.all(
+      'SELECT id, name, email, created_at FROM users ORDER BY created_at DESC'
+    );
+    return res.status(200).json({ users });
   } catch (err) {
     return res.status(500).json({ errors: [{ msg: 'Erro interno no servidor.' }] });
   }

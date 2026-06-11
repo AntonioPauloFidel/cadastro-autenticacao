@@ -1,34 +1,13 @@
 import { useState } from 'react';
-import RegisterForm from './components/RegisterForm';
-import LoginForm from './components/LoginForm';
+import AuthPage from './components/AuthPage';
+import HomePage from './components/HomePage';
 
 export default function App() {
-  const [tab, setTab] = useState('register');
+  const [user, setUser] = useState(null);
 
-  return (
-    <div className="container">
-      <h1>Sistema de Usuários</h1>
+  if (user) {
+    return <HomePage user={user} onLogout={() => setUser(null)} />;
+  }
 
-      <div className="tabs">
-        <button
-          className={tab === 'register' ? 'active' : ''}
-          onClick={() => setTab('register')}
-        >
-          Cadastro
-        </button>
-        <button
-          className={tab === 'login' ? 'active' : ''}
-          onClick={() => setTab('login')}
-        >
-          Login
-        </button>
-      </div>
-
-      {tab === 'register' ? (
-        <RegisterForm onSuccess={() => setTab('login')} />
-      ) : (
-        <LoginForm />
-      )}
-    </div>
-  );
+  return <AuthPage onLogin={setUser} />;
 }

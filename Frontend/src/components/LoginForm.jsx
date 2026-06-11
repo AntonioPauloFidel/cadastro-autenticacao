@@ -4,9 +4,8 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3001/api/auth';
 
-export default function LoginForm() {
+export default function LoginForm({ onLogin }) {
   const [serverError, setServerError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   const {
     register,
@@ -16,11 +15,10 @@ export default function LoginForm() {
 
   const onSubmit = async (data) => {
     setServerError('');
-    setSuccessMsg('');
 
     try {
       const response = await axios.post(`${API_URL}/login`, data);
-      setSuccessMsg(`Bem-vindo(a), ${response.data.user.name}!`);
+      onLogin(response.data.user);
     } catch (err) {
       if (err.response?.data?.errors?.length) {
         setServerError(err.response.data.errors[0].msg);
@@ -32,24 +30,21 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      {serverError && <div className="alert error">{serverError}</div>}
-      {successMsg && <div className="alert success">{successMsg}</div>}
+      {serverError && <div className="alert error">⚠ {serverError}</div>}
 
       <div className="field">
         <label htmlFor="login-email">E-mail</label>
         <input
           id="login-email"
           type="email"
+          placeholder="seu@email.com"
           className={errors.email ? 'error-input' : ''}
           {...register('email', {
             required: 'O e-mail é obrigatório.',
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: 'Informe um e-mail válido.',
-            },
+            pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'E-mail inválido.' },
           })}
         />
-        {errors.email && <span className="error-msg">{errors.email.message}</span>}
+        {errors.email && <span className="error-msg">⚠ {errors.email.message}</span>}
       </div>
 
       <div className="field">
@@ -57,15 +52,16 @@ export default function LoginForm() {
         <input
           id="login-password"
           type="password"
+          placeholder="••••••••"
           className={errors.password ? 'error-input' : ''}
           {...register('password', {
             required: 'A senha é obrigatória.',
           })}
         />
-        {errors.password && <span className="error-msg">{errors.password.message}</span>}
+        {errors.password && <span className="error-msg">⚠ {errors.password.message}</span>}
       </div>
 
-      <button type="submit" disabled={isSubmitting}>
+      <button type="submit" className="btn-primary" disabled={isSubmitting}>
         {isSubmitting ? 'Entrando...' : 'Entrar'}
       </button>
     </form>
