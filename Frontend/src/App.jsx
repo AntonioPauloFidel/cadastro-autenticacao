@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './components/AuthPage';
 import HomePage from './components/HomePage';
 
+function AppContent() {
+  const { user } = useAuth();
+  return user ? <HomePage /> : <AuthPage />;
+}
+
 export default function App() {
-  const [user, setUser] = useState(null);
-
-  if (user) {
-    return <HomePage user={user} onLogout={() => setUser(null)} />;
-  }
-
-  return <AuthPage onLogin={setUser} />;
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }

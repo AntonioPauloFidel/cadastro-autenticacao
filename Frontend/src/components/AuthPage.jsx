@@ -2,7 +2,7 @@ import { useState } from 'react';
 import RegisterForm from './RegisterForm';
 import LoginForm from './LoginForm';
 
-export default function AuthPage({ onLogin }) {
+export default function AuthPage() {
   const [tab, setTab] = useState('login');
 
   return (
@@ -13,7 +13,6 @@ export default function AuthPage({ onLogin }) {
           <path d="M8 56c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" fillOpacity="0.9"/>
         </svg>
         <h1>Bem-vindo ao Sistema</h1>
-        {/* <p>Gerencie seus usuários com segurança e praticidade.</p> */}
       </div>
 
       <div className="auth-right">
@@ -35,7 +34,7 @@ export default function AuthPage({ onLogin }) {
           </div>
 
           {tab === 'login' ? (
-            <LoginForm onLogin={onLogin} onSwitchToRegister={() => setTab('register')} />
+            <LoginForm onSwitchToRegister={() => setTab('register')} />
           ) : (
             <RegisterForm onSuccess={() => setTab('login')} />
           )}

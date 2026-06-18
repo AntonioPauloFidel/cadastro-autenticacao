@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = 'http://localhost:3001/api/auth';
 
-export default function LoginForm({ onLogin }) {
+export default function LoginForm({ onSwitchToRegister }) {
+  const { login } = useAuth();
   const [serverError, setServerError] = useState('');
 
   const {
@@ -15,10 +17,9 @@ export default function LoginForm({ onLogin }) {
 
   const onSubmit = async (data) => {
     setServerError('');
-
     try {
       const response = await axios.post(`${API_URL}/login`, data);
-      onLogin(response.data.user);
+      login(response.data.user);
     } catch (err) {
       if (err.response?.data?.errors?.length) {
         setServerError(err.response.data.errors[0].msg);

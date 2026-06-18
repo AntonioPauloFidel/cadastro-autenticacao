@@ -1,15 +1,8 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3001/api/auth';
+import { useAuth } from '../contexts/AuthContext';
+import { UsersProvider, useUsers } from '../contexts/UsersContext';
 
 function initials(name) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase();
+  return name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 }
 
 function formatDate(raw) {
@@ -18,77 +11,100 @@ function formatDate(raw) {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-export default function HomePage({ user, onLogout }) {
-  const [users, setUsers]     = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState('');
+function Pagination() {
+  const { pagination, page, setPage } = useUsers();
+  const { totalPages, total } = pagination;
 
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/users`)
-      .then((res) => setUsers(res.data.users))
-      .catch(() => setError('Não foi possível carregar os usuários.'))
-      .finally(() => setLoading(false));
-  }, []);
+  if (totalPages <= 1) return null;
+
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="home-page">
-      <nav className="navbar">
-        <div className="navbar-brand">
-          {/* <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="16" cy="10" r="6" fill="#6366f1" />
-            <path d="M4 28c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" />
-          </svg> */}
-          
-        </div>
+    <div className="pagination">
+      <button
+        className="page-btn"
+        disabled={page === 1}
+        onClick={() => setPage((p) => p - 1)}
+        aria-label="Página anterior"
+      >
+        ‹
+      </button>
 
-        <div className="navbar-right">
-          <div className="user-pill">
-            <div className="avatar">{initials(user.name)}</div>
-            <span>{user.name.split(' ')[0]}</span>
-          </div>
-          <button className="btn-logout" onClick={onLogout}>
-            Sair
+      {pages.map((p) => (
+        <button
+          key={p}
+          className={`page-btn ${p === page ? 'active' : ''}`}
+          onClick={() => setPage(p)}
+        >
+          {p}
+        </button>
+      ))}
+
+      <button
+        className="page-btn"
+        disabled={page === totalPages}
+        onClick={() => setPage((p) => p + 1)}
+        aria-label="Próxima página"
+      >
+        ›
+      </button>
+
+      <span className="page-info">{total} {total === 1 ? 'usuário' : 'usuários'}</span>
+    </div>
+  );
+}
+
+function UsersTable() {
+  const { users, pagination, loading, error, search, handleSearch, page } = useUsers();
+  const { user } = useAuth();
+
+  return (
+    <>
+      <div className="section-header">
+        <h3>Usuários cadastrados</h3>
+        {!loading && !error && (
+          <span className="badge">
+            {pagination.total} {pagination.total === 1 ? 'usuário' : 'usuários'}
+          </span>
+        )}
+      </div>
+
+      <div className="search-bar-wrapper">
+        <span className="search-icon">⌕</span>
+        <input
+          className="search-bar"
+          type="text"
+          placeholder="Buscar por nome ou e-mail..."
+          value={search}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+        {search && (
+          <button className="search-clear" onClick={() => handleSearch('')} aria-label="Limpar busca">
+            ×
           </button>
-        </div>
-      </nav>
+        )}
+      </div>
 
-      <div className="home-content">
-        <div className="welcome-banner">
-          <div>
-            <h2>Olá, {user.name.split(' ')[0]}! 👋</h2>
-            <p>Você está logado como <strong>{user.email}</strong></p>
+      <div className="table-card">
+        {loading && (
+          <div className="spinner">
+            <div className="spin" />
+            Carregando...
           </div>
-          <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="48" cy="30" r="18" fill="white" />
-            <path d="M12 84c0-19.882 16.118-36 36-36s36 16.118 36 36" stroke="white" strokeWidth="6" strokeLinecap="round" />
-          </svg>
-        </div>
+        )}
 
-        <div className="section-header">
-          <h3>Usuários cadastrados</h3>
-          {!loading && !error && (
-            <span className="badge">{users.length} {users.length === 1 ? 'usuário' : 'usuários'}</span>
-          )}
-        </div>
+        {error && !loading && (
+          <div className="alert error" style={{ margin: '1.5rem' }}>⚠ {error}</div>
+        )}
 
-        <div className="table-card">
-          {loading && (
-            <div className="spinner">
-              <div className="spin" />
-              Carregando...
-            </div>
-          )}
+        {!loading && !error && users.length === 0 && (
+          <div className="empty-state">
+            {search ? `Nenhum resultado para "${search}".` : 'Nenhum usuário cadastrado ainda.'}
+          </div>
+        )}
 
-          {error && !loading && (
-            <div className="alert error" style={{ margin: '1.5rem' }}>⚠ {error}</div>
-          )}
-
-          {!loading && !error && users.length === 0 && (
-            <div className="empty-state">Nenhum usuário cadastrado ainda.</div>
-          )}
-
-          {!loading && !error && users.length > 0 && (
+        {!loading && !error && users.length > 0 && (
+          <>
             <table className="users-table">
               <thead>
                 <tr>
@@ -118,9 +134,50 @@ export default function HomePage({ user, onLogout }) {
                 ))}
               </tbody>
             </table>
-          )}
+
+            <Pagination />
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+export default function HomePage() {
+  const { user, logout } = useAuth();
+
+  return (
+    <UsersProvider>
+      <div className="home-page">
+        <nav className="navbar">
+          <div className="navbar-brand">UserHub</div>
+
+          <div className="navbar-right">
+            <div className="user-pill">
+              <div className="avatar">{initials(user.name)}</div>
+              <span>{user.name.split(' ')[0]}</span>
+            </div>
+            <button className="btn-logout" onClick={logout}>
+              Sair
+            </button>
+          </div>
+        </nav>
+
+        <div className="home-content">
+          <div className="welcome-banner">
+            <div>
+              <h2>Olá, {user.name.split(' ')[0]}! 👋</h2>
+              <p>Você está logado como <strong>{user.email}</strong></p>
+            </div>
+            <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="48" cy="30" r="18" fill="white" />
+              <path d="M12 84c0-19.882 16.118-36 36-36s36 16.118 36 36" stroke="white" strokeWidth="6" strokeLinecap="round" />
+            </svg>
+          </div>
+
+          <UsersTable />
         </div>
       </div>
-    </div>
+    </UsersProvider>
   );
 }
