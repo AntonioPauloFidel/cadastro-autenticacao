@@ -1,5 +1,9 @@
 # Cadastro e Autenticação de Usuários
 Sistema fullstack de cadastro e login de usuários com React no frontend e Node.js + SQLite no backend.
+
+## Deploy
+
+**[https://cadastro-autenticacao-production.up.railway.app](https://cadastro-autenticacao-production.up.railway.app)**
 ## Estrutura do Projeto
 ```
 /
