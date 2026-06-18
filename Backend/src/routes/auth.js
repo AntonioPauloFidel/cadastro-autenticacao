@@ -93,10 +93,33 @@ router.post('/login', loginValidations, async (req, res) => {
 
 router.get('/users', async (req, res) => {
   try {
-    const users = await db.all(
-      'SELECT id, name, email, created_at FROM users ORDER BY created_at DESC'
+    const page   = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit  = Math.min(20, Math.max(1, parseInt(req.query.limit) || 8));
+    const search = (req.query.search || '').trim();
+    const offset = (page - 1) * limit;
+
+    const where  = search ? 'WHERE name LIKE ? OR email LIKE ?' : '';
+    const params = search ? [`%${search}%`, `%${search}%`] : [];
+
+    const { count } = await db.get(
+      `SELECT COUNT(*) AS count FROM users ${where}`,
+      params
     );
-    return res.status(200).json({ users });
+
+    const users = await db.all(
+      `SELECT id, name, email, created_at FROM users ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+
+    return res.status(200).json({
+      users,
+      pagination: {
+        total:      count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    });
   } catch (err) {
     return res.status(500).json({ errors: [{ msg: 'Erro interno no servidor.' }] });
   }
