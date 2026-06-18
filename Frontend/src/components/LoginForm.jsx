@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_URL = 'http://localhost:3001/api/auth';
+const API_URL = '/api/auth';
 
 export default function LoginForm({ onSwitchToRegister }) {
   const { login } = useAuth();

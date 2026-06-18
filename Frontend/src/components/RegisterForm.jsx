@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api/auth';
+const API_URL = '/api/auth';
 
 export default function RegisterForm({ onSuccess }) {
   const [serverError, setServerError] = useState('');

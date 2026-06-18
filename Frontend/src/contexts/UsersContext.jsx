@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const UsersContext = createContext(null);
 
-const API_URL = 'http://localhost:3001/api/auth';
+const API_URL = '/api/auth';
 const PAGE_SIZE = 8;
 
 export function UsersProvider({ children }) {
